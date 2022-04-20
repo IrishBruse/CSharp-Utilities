@@ -1,0 +1,60 @@
+{
+	"name": "csharp-utilities",
+	"displayName": "C# Utilities",
+	"description": "C# Utility commands Visual Studio Code.",
+	"version": "0.1.1",
+	"author": "Ethan Conneely",
+	"license": "MIT",
+	"publisher": "irishbruse",
+	"engines": {
+		"vscode": "^1.66.0"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/IrishBruse/CSharp-Debugger"
+	},
+	"keywords": [
+		"csharp",
+		"C#",
+		"debug",
+		"debugging",
+		"debugger"
+	],
+	"activationEvents": [
+		"onCommand:irishbruse.csharp-utilities.generate-assets"
+	],
+	"main": "./out/extension.js",
+	"contributes": {
+		"commands": [
+			{
+				"command": "irishbruse.csharp-utilities.generate-assets",
+				"title": ".NET: Generate Assets from .sln"
+			}
+		]
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./",
+		"pretest": "npm run compile && npm run lint",
+		"lint": "eslint src --ext ts",
+		"test": "node ./out/test/runTest.js"
+	},
+	"devDependencies": {
+		"@types/fs-extra": "5.0.4",
+		"@types/glob": "^7.2.0",
+		"@types/mocha": "^9.1.0",
+		"@types/node": "14.x",
+		"@types/vscode": "^1.66.0",
+		"@typescript-eslint/eslint-plugin": "^5.16.0",
+		"@typescript-eslint/parser": "^5.16.0",
+		"@vscode/test-electron": "^2.1.3",
+		"eslint": "^8.11.0",
+		"glob": "^7.2.0",
+		"mocha": "^9.2.2",
+		"typescript": "^4.5.5"
+	},
+	"dependencies": {
+		"fs-extra": "^10.1.0"
+	}
+}
