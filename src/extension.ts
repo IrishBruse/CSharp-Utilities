@@ -1,4 +1,4 @@
-import { commands, ExtensionContext, FileCreateEvent, FileRenameEvent, SnippetString, window, workspace } from "vscode";
+import { commands, ExtensionContext, FileCreateEvent, SnippetString, window, workspace } from "vscode";
 import * as fs from "fs-extra";
 import { GENERATE_ASSETS_ID } from "./Consts";
 import { TaskJson } from "./TaskJson";
@@ -92,8 +92,13 @@ async function handleJson(launchJson: LaunchJson, tasksJson: TaskJson, projectNa
     });
 
     if (launchAlreadyExists === false) {
+        let outputTypeRegex = new RegExp("<OutputType>(.*)</OutputType>");
         let targetFrameworkRegex = new RegExp("<TargetFramework>(.*)<\/TargetFramework>");
         let data = fs.readFileSync(path.join(workspace.workspaceFolders![0].uri.fsPath, projectPath)).toString();
+        let outputType = outputTypeRegex.exec(data)![1];
+        if (outputType === "Library") {
+            return;
+        }
         let target = targetFrameworkRegex.exec(data)![1];
 
         if (target !== undefined) {
