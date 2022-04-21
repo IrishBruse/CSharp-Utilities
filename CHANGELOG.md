@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.1 
+- Fix icon in readme
+
 ## 0.2.0
 - Updated `Generate Assets from .sln` to use target framework
 - Added `New File Template`

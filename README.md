@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="assets/128.png">
+    <img src="https://raw.githubusercontent.com/IrishBruse/CSharp-Utilities/main/assets/128.png">
     <h1>C# Utilities</h1>
 </div>
 
