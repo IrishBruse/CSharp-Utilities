@@ -1,7 +1,10 @@
 # Changelog
 
+## 0.2.3
+- Generate only build tasks for `Library` projects
+
 ## 0.2.2
-- Dont add assets for Library projects only WinExe and Exe projects
+- Dont add assets for `Library` projects only `WinExe` and `Exe` projects
 
 ## 0.2.1 
 - Fix icon in readme

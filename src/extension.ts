@@ -57,7 +57,7 @@ async function generateAssets() {
 
     fs.ensureDirSync(path.join(path.dirname(file), ".vscode"));
 
-    let text = fs.readFileSync(file).toString().split("\n");
+    let lines = fs.readFileSync(file).toString().split("\n");
 
     let launchPath = path.join(path.dirname(file), ".vscode", "launch.json");
     let launchJson: LaunchJson = getLaunchJson(launchPath);
@@ -65,7 +65,9 @@ async function generateAssets() {
     let tasksPath = path.join(path.dirname(file), ".vscode", "tasks.json");
     let tasksJson: TaskJson = getTaskJson(tasksPath);
 
-    text.filter(line => line.indexOf("Project") === 0).forEach(async (line) => {
+    let projects = lines.filter(line => line.indexOf("Project") === 0);
+
+    for (const line of projects) {
         const project = line.split("=")[1].trim();
         let projData = project.split(",");
 
@@ -76,14 +78,15 @@ async function generateAssets() {
 
         let projectDir = path.dirname(projectPath);
 
-        await handleJson(launchJson, tasksJson, projectName, projectDir, projectPath);
-    });
+        await generateLaunch(launchJson, projectName, projectDir, projectPath);
+        await generateTask(tasksJson, projectName, projectPath);
+    }
 
     fs.writeFileSync(tasksPath, JSON.stringify(tasksJson, null, 4));
     fs.writeFileSync(launchPath, JSON.stringify(launchJson, null, 4));
 }
 
-async function handleJson(launchJson: LaunchJson, tasksJson: TaskJson, projectName: string, projectDir: string, projectPath: string) {
+async function generateLaunch(launchJson: LaunchJson, projectName: string, projectDir: string, projectPath: string) {
     let launchAlreadyExists = false;
     launchJson.configurations.forEach(config => {
         if (config.name === projectName) {
@@ -95,49 +98,63 @@ async function handleJson(launchJson: LaunchJson, tasksJson: TaskJson, projectNa
         let outputTypeRegex = new RegExp("<OutputType>(.*)</OutputType>");
         let targetFrameworkRegex = new RegExp("<TargetFramework>(.*)<\/TargetFramework>");
         let data = fs.readFileSync(path.join(workspace.workspaceFolders![0].uri.fsPath, projectPath)).toString();
-        let outputType = outputTypeRegex.exec(data)![1];
-        if (outputType === "Library") {
+        let outputTypes = outputTypeRegex.exec(data);
+
+        if (outputTypes === null || outputTypes[1] === null) {
             return;
         }
-        let target = targetFrameworkRegex.exec(data)![1];
 
-        if (target !== undefined) {
-            launchJson.configurations.push({
-                name: projectName,
-                type: "coreclr",
-                request: "launch",
-                preLaunchTask: "Build " + projectName,
-                program: "${workspaceFolder}/" + projectDir + "/bin/Debug/" + target[1] + "/" + projectName + ".dll",
-                cwd: "${workspaceFolder}/" + projectDir,
-                console: "integratedTerminal"
-            });
-        } else {
-            window.showErrorMessage("Could not find target framework in " + projectPath);
+        // Cant launch debug run a Library project
+        if (outputTypes[1] === "Library") {
+            return;
         }
+
+        let target = targetFrameworkRegex.exec(data);
+
+        if (target === null) {
+            window.showErrorMessage("Could not find target framework in " + projectPath);
+            return;
+        }
+
+        launchJson.configurations.push({
+            name: projectName,
+            type: "coreclr",
+            request: "launch",
+            preLaunchTask: "Build " + projectName,
+            program: "${workspaceFolder}/" + projectDir + "/bin/Debug/" + target[1] + "/" + projectName + ".dll",
+            cwd: "${workspaceFolder}/" + projectDir,
+            console: "integratedTerminal"
+        });
     }
+}
+
+async function generateTask(tasksJson: TaskJson, projectName: string, projectPath: string) {
 
     let taskAlreadyExists = false;
-    tasksJson.tasks.forEach(task => {
+
+    for (const task of tasksJson.tasks) {
         if (task.label === "Build " + projectName) {
             taskAlreadyExists = true;
         }
-    });
-
-    if (taskAlreadyExists === false) {
-        tasksJson.tasks.push({
-            label: "Build " + projectName,
-            command: "dotnet",
-            type: "process",
-            args: [
-                "build",
-                "${workspaceFolder}/" + projectPath,
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
-            ],
-            problemMatcher: "$msCompile",
-            group: "build"
-        });
     }
+
+    if (taskAlreadyExists) {
+        return;
+    }
+
+    tasksJson.tasks.push({
+        label: "Build " + projectName,
+        command: "dotnet",
+        type: "process",
+        args: [
+            "build",
+            "${workspaceFolder}/" + projectPath,
+            "/property:GenerateFullPaths=true",
+            "/consoleloggerparameters:NoSummary"
+        ],
+        problemMatcher: "$msCompile",
+        group: "build"
+    });
 }
 
 function getLaunchJson(launchPath: string): LaunchJson {
