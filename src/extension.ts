@@ -1,21 +1,51 @@
-import * as vscode from "vscode";
+import { commands, ExtensionContext, FileCreateEvent, FileRenameEvent, SnippetString, window, workspace } from "vscode";
 import * as fs from "fs-extra";
-import { DEBUG_COMMAND_ID } from "./Consts";
+import { GENERATE_ASSETS_ID } from "./Consts";
 import { TaskJson } from "./TaskJson";
 import { LaunchJson } from "./LaunchJson";
 import path = require("path");
 
-export async function activate(context: vscode.ExtensionContext) {
-    context.subscriptions.push(vscode.commands.registerCommand(DEBUG_COMMAND_ID, debug));
+export async function activate(context: ExtensionContext) {
+    context.subscriptions.push(commands.registerCommand(GENERATE_ASSETS_ID, generateAssets));
+    context.subscriptions.push(workspace.onDidCreateFiles(handleNewCsharpFile));
 }
 
-async function debug() {
-    const slnFiles = await vscode.workspace.findFiles("{**/*.sln}", "{**/node_modules/**,**/.git/**,**/bower_components/**}", 100);
+async function handleNewCsharpFile(e: FileCreateEvent) {
+    for (const file of e.files) {
+        if (!file.fsPath.endsWith(".cs")) {
+            continue;
+        }
 
-    let file;
+        const textDocument = await workspace.openTextDocument(file);
+        if (textDocument.getText()) {
+            continue;
+        }
+
+        const snippetLines: string[] = [];
+        snippetLines.push("namespace $WORKSPACE_NAME;");
+        snippetLines.push("");
+        snippetLines.push("public ${1|class ,struct ,interface ,enum ,abstract class ,interface I|}${TM_FILENAME_BASE}");
+        snippetLines.push("{");
+        snippetLines.push("\t$0");
+        snippetLines.push("}");
+        snippetLines.push("");
+
+        const textEditor = await window.showTextDocument(file);
+        textEditor.insertSnippet(new SnippetString(snippetLines.join("\n")));
+    }
+}
+
+async function generateAssets() {
+    const slnFiles = await workspace.findFiles("{**/*.sln}", "{**/node_modules/**,**/.git/**,**/bower_components/**}", 100);
+
+    let file: string;
 
     if (slnFiles.length > 1) {
-        file = await vscode.window.showQuickPick(slnFiles.map(f => f.fsPath));
+        let t = await window.showQuickPick(slnFiles.map(f => f.fsPath));
+        if (t === undefined) {
+            return;
+        }
+        file = t;
     }
     else {
         file = slnFiles[0].fsPath;
@@ -35,7 +65,7 @@ async function debug() {
     let tasksPath = path.join(path.dirname(file), ".vscode", "tasks.json");
     let tasksJson: TaskJson = getTaskJson(tasksPath);
 
-    text.filter(line => line.indexOf("Project") === 0).forEach(line => {
+    text.filter(line => line.indexOf("Project") === 0).forEach(async (line) => {
         const project = line.split("=")[1].trim();
         let projData = project.split(",");
 
@@ -46,41 +76,38 @@ async function debug() {
 
         let projectDir = path.dirname(projectPath);
 
-        handleJson(launchJson, tasksJson, projectName, projectDir, projectPath);
+        await handleJson(launchJson, tasksJson, projectName, projectDir, projectPath);
     });
-
 
     fs.writeFileSync(tasksPath, JSON.stringify(tasksJson, null, 4));
     fs.writeFileSync(launchPath, JSON.stringify(launchJson, null, 4));
 }
 
-function handleJson(launchJson: LaunchJson, tasksJson: TaskJson, projectName: string, projectDir: string, projectPath: string) {
-
+async function handleJson(launchJson: LaunchJson, tasksJson: TaskJson, projectName: string, projectDir: string, projectPath: string) {
     let launchAlreadyExists = false;
     launchJson.configurations.forEach(config => {
         if (config.name === projectName) {
             launchAlreadyExists = true;
         }
     });
+
     if (launchAlreadyExists === false) {
         let targetFrameworkRegex = new RegExp("<TargetFramework>(.*)<\/TargetFramework>");
-        let data = fs.readFileSync(projectPath).toString();
-        let target = targetFrameworkRegex.exec(data);
+        let data = fs.readFileSync(path.join(workspace.workspaceFolders![0].uri.fsPath, projectPath)).toString();
+        let target = targetFrameworkRegex.exec(data)![1];
 
-        if (target !== null) {
-            console.log(target[0]);
-
+        if (target !== undefined) {
             launchJson.configurations.push({
                 name: projectName,
                 type: "coreclr",
                 request: "launch",
                 preLaunchTask: "Build " + projectName,
-                program: "${workspaceFolder}" + projectDir + "/bin/Debug/" + target + "/" + projectName + ".dll",
+                program: "${workspaceFolder}/" + projectDir + "/bin/Debug/" + target[1] + "/" + projectName + ".dll",
                 cwd: "${workspaceFolder}/" + projectDir,
                 console: "integratedTerminal"
             });
         } else {
-            vscode.window.showErrorMessage("Could not find target framework in " + projectPath);
+            window.showErrorMessage("Could not find target framework in " + projectPath);
         }
     }
 

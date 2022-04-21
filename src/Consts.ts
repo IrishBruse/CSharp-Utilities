@@ -1,4 +1,5 @@
-export const CSHARP_EXTENSION_ID = "dotnettools.csharp";
-
 const AUTHOR = "irishbruse.";
-export const DEBUG_COMMAND_ID = AUTHOR + "csharp-utilities.generate-assets";
+const EXTENSION = "csharp-utilities.";
+const _ = AUTHOR + EXTENSION;
+
+export const GENERATE_ASSETS_ID = _ + "generate-assets";

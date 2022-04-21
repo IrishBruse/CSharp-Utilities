@@ -2,7 +2,7 @@
 	"name": "csharp-utilities",
 	"displayName": "C# Utilities",
 	"description": "C# Utility commands Visual Studio Code.",
-	"version": "0.1.1",
+	"version": "0.2.0",
 	"author": "Ethan Conneely",
 	"license": "MIT",
 	"publisher": "irishbruse",
@@ -11,17 +11,18 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/IrishBruse/CSharp-Debugger"
+		"url": "https://github.com/IrishBruse/CSharp-Utilities"
 	},
 	"keywords": [
 		"csharp",
-		"C#",
-		"debug",
-		"debugging",
-		"debugger"
+		"utilities",
+		".vscode"
 	],
 	"activationEvents": [
-		"onCommand:irishbruse.csharp-utilities.generate-assets"
+		"onCommand:irishbruse.csharp-utilities.generate-assets",
+		"onLanguage:csharp",
+		"workspaceContains:*.sln",
+		"workspaceContains:*.csproj"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -56,5 +57,6 @@
 	},
 	"dependencies": {
 		"fs-extra": "^10.1.0"
-	}
+	},
+	"icon": "assets/128.png"
 }
