@@ -28,11 +28,14 @@
 	"contributes": {
 		"commands": [
 			{
-				"command": "irishbruse.csharp-utilities.generate-assets",
+				"command": "csharp-utilities.generate-assets",
 				"title": ".NET: Generate Assets from .sln"
 			}
 		]
 	},
+	"extensionDependencies": [
+		"ms-dotnettools.csharp"
+	],
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
 		"compile": "tsc -p ./",
