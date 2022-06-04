@@ -3,35 +3,24 @@ import * as fs from "fs-extra";
 import { TaskJson } from "./TaskJson";
 import { LaunchJson } from "./LaunchJson";
 import path = require("path");
+import { getSolutionFile } from "../../utility";
 
 export async function generateAssets() {
-    const slnFiles = await workspace.findFiles("{**/*.sln}", "{**/node_modules/**,**/.git/**,**/bower_components/**}", 100);
+    let sln = await getSolutionFile();
 
-    let file: string;
-
-    if (slnFiles.length > 1) {
-        let t = await window.showQuickPick(slnFiles.map(f => f.fsPath));
-        if (t === undefined) {
-            return;
-        }
-        file = t;
-    }
-    else {
-        file = slnFiles[0].fsPath;
-    }
-
-    if (file === undefined) {
+    if (!sln) {
+        window.showErrorMessage("Error no solution file found");
         return;
     }
 
-    fs.ensureDirSync(path.join(path.dirname(file), ".vscode"));
+    fs.ensureDirSync(path.join(path.dirname(sln), ".vscode"));
 
-    let lines = fs.readFileSync(file).toString().split("\n");
+    let lines = fs.readFileSync(sln).toString().split("\n");
 
-    let launchPath = path.join(path.dirname(file), ".vscode", "launch.json");
+    let launchPath = path.join(path.dirname(sln), ".vscode", "launch.json");
     let launchJson: LaunchJson = getLaunchJson(launchPath);
 
-    let tasksPath = path.join(path.dirname(file), ".vscode", "tasks.json");
+    let tasksPath = path.join(path.dirname(sln), ".vscode", "tasks.json");
     let tasksJson: TaskJson = getTaskJson(tasksPath);
 
     let projects = lines.filter(line => line.indexOf("Project") === 0);

@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.3.1
+- Added right click to csproj command Add csproj to solution
+
 ## 0.2.3
 - Generate only build tasks for `Library` projects
 

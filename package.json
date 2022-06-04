@@ -2,7 +2,7 @@
 	"name": "csharp-utilities",
 	"displayName": "C# Utilities",
 	"description": "C# Utility commands Visual Studio Code.",
-	"version": "0.2.3",
+	"version": "0.3.1",
 	"author": "Ethan Conneely",
 	"license": "MIT",
 	"publisher": "irishbruse",
@@ -19,7 +19,8 @@
 		".vscode"
 	],
 	"activationEvents": [
-		"onCommand:irishbruse.csharp-utilities.generate-assets",
+		"onCommand:csharp-utilities.generate-assets",
+		"onCommand:csharp-utilities.solution.add",
 		"onLanguage:csharp",
 		"workspaceContains:*.sln",
 		"workspaceContains:*.csproj"
@@ -30,8 +31,21 @@
 			{
 				"command": "csharp-utilities.generate-assets",
 				"title": ".NET: Generate Assets from .sln"
+			},
+			{
+				"command": "csharp-utilities.solution.add",
+				"title": ".NET: Add project to solution"
 			}
-		]
+		],
+		"menus": {
+			"explorer/context": [
+				{
+					"when": "resourceExtname == .csproj",
+					"command": "csharp-utilities.solution.add",
+					"group": ".Net"
+				}
+			]
+		}
 	},
 	"extensionDependencies": [
 		"ms-dotnettools.csharp"
