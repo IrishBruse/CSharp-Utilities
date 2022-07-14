@@ -1,16 +1,24 @@
-import { window, workspace } from "vscode";
+import * as vscode from "vscode";
 
-export async function getSolutionFile() {
-    const slnFiles = await workspace.findFiles("{**/*.sln}", "{**/node_modules/**,**/.git/**,**/bower_components/**}", 100);
+export async function getSolutionFile(): Promise<string | undefined> {
+    const slnFiles = await vscode.workspace.findFiles("{**/*.sln}", "**/.git/**}", 100);
+    if (slnFiles.length === 0) {
+        return;
+    }
 
-    let file: string | undefined;
+    let sln = slnFiles[0].fsPath;
 
     if (slnFiles.length > 1) {
-        file = await window.showQuickPick(slnFiles.map(f => f.fsPath));
-    }
-    else {
-        file = slnFiles[0].fsPath;
+        const choice = await vscode.window.showQuickPick(slnFiles.map(file => file.fsPath))
+        if (!choice) {
+            return;
+        }
+        sln = choice;
     }
 
-    return file;
+    if (!sln) {
+        return;
+    }
+
+    return sln;
 }

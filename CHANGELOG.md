@@ -1,5 +1,11 @@
 # Changelog
 
+> 0.4.0
+
+Added:
+- Auto Generate Assets
+- Distributing with Webpack
+
 > 0.3.1
 
 Added right click to csproj command Add csproj to solution
@@ -12,7 +18,7 @@ Generate only build tasks for `Library` projects
 
 Dont add assets for `Library` projects only `WinExe` and `Exe` projects
 
-> 0.2.1 
+> 0.2.1
 
 Fix icon in readme
 

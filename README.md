@@ -10,6 +10,7 @@ This extension adds utilitity commands and features that I found I needed when w
   - [Add csproj to solution](#add-csproj-to-solution)
 - [Features](#features)
   - [New File Template](#new-file-template)
+  - [Auto Generate Assets](#auto-generate-assets)
 
 # Commands
 
@@ -18,6 +19,12 @@ It generates all launch.json and task.json for all the projects inside the solut
 Rerun this if you update the sln it will only add the newly added projects.
 If you dont have a sln file you can do `dotnet new sln`.
 You can add them from the command line using `dotnet sln add path/to/*.csproj`.
+It wont replace any custom tasks or launch configs you have.
+
+We now have config option to config the auto generated config files
+- `Launch Config: Console`
+- `Launch Config: Internal Console Options`
+- `Task Config: Problem Matcher`
 
 ## Add csproj to solution
 Right click on `.csproj` to add it to the solution.
@@ -29,3 +36,7 @@ One done you can run the [Generate Assets from .sln](#generate-assets-from-sln)
 ## New File Template
 When creating a new .cs file it automatically generates with a template containing a file scoped
 namespace and a selection of `class`, `struct`, `interface`, `enum`, `abstract class`, `interface`
+
+## Auto Generate Assets
+When a folder or workspace is loaded if the config `csharp-utilities.autoGenerateAssets`
+is enabled in the settings then it will run [Generate Assets from .sln](#generate-assets-from-.sln) automatically

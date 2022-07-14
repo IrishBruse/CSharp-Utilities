@@ -10,11 +10,10 @@ export async function handleNewFile(e: FileCreateEvent) {
         if (textDocument.getText()) {
             continue;
         }
-
         const snippetLines: string[] = [];
         snippetLines.push("namespace $WORKSPACE_NAME;");
         snippetLines.push("");
-        snippetLines.push("public ${1|class ,struct ,interface ,enum ,abstract class ,interface I|}${TM_FILENAME_BASE}");
+        snippetLines.push("public ${1|class,struct,interface,enum,abstract class|} ${TM_FILENAME_BASE}");
         snippetLines.push("{");
         snippetLines.push("\t$0");
         snippetLines.push("}");

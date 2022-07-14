@@ -1,79 +1,116 @@
 {
-	"name": "csharp-utilities",
-	"displayName": "C# Utilities",
-	"description": "C# Utility commands Visual Studio Code.",
-	"version": "0.3.1",
-	"author": "Ethan Conneely",
-	"license": "MIT",
-	"publisher": "irishbruse",
-	"engines": {
-		"vscode": "^1.66.0"
-	},
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/IrishBruse/CSharp-Utilities"
-	},
-	"keywords": [
-		"csharp",
-		"utilities",
-		".vscode"
-	],
-	"activationEvents": [
-		"onCommand:csharp-utilities.generate-assets",
-		"onCommand:csharp-utilities.solution.add",
-		"onLanguage:csharp",
-		"workspaceContains:*.sln",
-		"workspaceContains:*.csproj"
-	],
-	"main": "./out/extension.js",
-	"contributes": {
-		"commands": [
-			{
-				"command": "csharp-utilities.generate-assets",
-				"title": ".NET: Generate Assets from .sln"
-			},
-			{
-				"command": "csharp-utilities.solution.add",
-				"title": ".NET: Add project to solution"
-			}
-		],
-		"menus": {
-			"explorer/context": [
-				{
-					"when": "resourceExtname == .csproj",
-					"command": "csharp-utilities.solution.add",
-					"group": ".Net"
-				}
-			]
-		}
-	},
-	"extensionDependencies": [
-		"ms-dotnettools.csharp"
-	],
-	"scripts": {
-		"vscode:prepublish": "npm run compile",
-		"compile": "tsc -p ./",
-		"watch": "tsc -watch -p ./",
-		"pretest": "npm run compile && npm run lint",
-		"lint": "eslint src --ext ts",
-		"test": "node ./out/test/runTest.js"
-	},
-	"devDependencies": {
-		"@types/fs-extra": "5.0.4",
-		"@types/glob": "^7.2.0",
-		"@types/mocha": "^9.1.0",
-		"@types/node": "14.x",
-		"@types/vscode": "^1.66.0",
-		"@typescript-eslint/eslint-plugin": "^5.16.0",
-		"@typescript-eslint/parser": "^5.16.0",
-		"@vscode/test-electron": "^2.1.3",
-		"eslint": "^8.11.0",
-		"glob": "^7.2.0",
-		"mocha": "^9.2.2",
-		"typescript": "^4.5.5"
-	},
-	"dependencies": {
-		"fs-extra": "^10.1.0"
-	},
-	"icon": "assets/128.png"
+    "name": "csharp-utilities",
+    "displayName": "C# Utilities",
+    "description": "C# Utility commands Visual Studio Code.",
+    "version": "0.4.0",
+    "author": "Ethan Conneely",
+    "license": "MIT",
+    "publisher": "irishbruse",
+    "main": "./dist/extension.js",
+    "icon": "assets/128.png",
+    "engines": {
+        "vscode": "^1.66.0"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/IrishBruse/CSharp-Utilities"
+    },
+    "keywords": [
+        "csharp",
+        "utilities",
+        ".vscode"
+    ],
+    "activationEvents": [
+        "onCommand:csharp-utilities.generate-assets",
+        "onCommand:csharp-utilities.solution.add",
+        "onLanguage:csharp",
+        "workspaceContains:*.csproj"
+    ],
+    "contributes": {
+        "commands": [
+            {
+                "command": "csharp-utilities.generate-assets",
+                "title": ".NET: Generate Assets from .sln"
+            },
+            {
+                "command": "csharp-utilities.solution.add",
+                "title": ".NET: Add project to solution"
+            }
+        ],
+        "menus": {
+            "explorer/context": [
+                {
+                    "when": "resourceExtname == .csproj",
+                    "command": "csharp-utilities.solution.add",
+                    "group": ".Net"
+                }
+            ]
+        },
+        "configuration": {
+            "title": "C# Utilities",
+            "properties": {
+                "csharp-utilities.autoGenerateAssets": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "When a folder with a .sln file is opened, automatically generate assets for the project."
+                },
+                "csharp-utilities.launchConfig.internalConsoleOptions": {
+                    "type": "string",
+                    "default": "neverOpen",
+                    "enum": [
+                        "neverOpen",
+                        "openOnFirstSessionStart",
+                        "openOnSessionStart"
+                    ]
+                },
+                "csharp-utilities.launchConfig.console": {
+                    "type": "string",
+                    "default": "integratedTerminal",
+                    "enum": [
+                        "integratedTerminal",
+                        "externalTerminal",
+                        "internalConsole"
+                    ]
+                },
+                "csharp-utilities.taskConfig.problemMatcher": {
+                    "type": "string",
+                    "default": "$msCompile"
+                }
+            }
+        }
+    },
+    "extensionDependencies": [
+        "ms-dotnettools.csharp"
+    ],
+    "scripts": {
+        "vscode:prepublish": "npm run package",
+        "compile": "webpack",
+        "watch": "webpack --watch",
+        "package": "webpack --mode production --devtool hidden-source-map",
+        "compile-tests": "tsc -p . --outDir out",
+        "watch-tests": "tsc -p . -w --outDir out",
+        "pretest": "npm run compile-tests && npm run compile && npm run lint",
+        "lint": "eslint src --ext ts",
+        "test": "node ./out/test/runTest.js"
+    },
+    "devDependencies": {
+        "@types/fs-extra": "^9.0.13",
+        "@types/glob": "^7.2.0",
+        "@types/mocha": "^9.1.1",
+        "@types/node": "16.x",
+        "@types/vscode": "^1.66.0",
+        "@typescript-eslint/eslint-plugin": "^5.30.0",
+        "@typescript-eslint/parser": "^5.30.0",
+        "@vscode/test-electron": "^2.1.5",
+        "eslint": "^8.18.0",
+        "glob": "^8.0.3",
+        "mocha": "^10.0.0",
+        "ts-loader": "^9.3.1",
+        "typescript": "^4.7.4",
+        "webpack": "^5.73.0",
+        "webpack-cli": "^4.10.0"
+    },
+    "dependencies": {
+        "fs-extra": "^10.1.0"
+    }
 }

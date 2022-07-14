@@ -1,104 +1,91 @@
-import { window, workspace } from "vscode";
-import * as fs from "fs-extra";
-import { TaskJson } from "./TaskJson";
-import { LaunchJson } from "./LaunchJson";
-import path = require("path");
-import { getSolutionFile } from "../../utility";
+import * as vscode from "vscode";
+import * as fs from "fs";
+import * as utility from "../../utility";
+import * as path from "path";
+import { ns } from "../../extension";
 
 export async function generateAssets() {
-    let sln = await getSolutionFile();
+
+    const sln = await utility.getSolutionFile();
 
     if (!sln) {
-        window.showErrorMessage("Error no solution file found");
+        vscode.window.showErrorMessage("No solution file found");
         return;
     }
 
-    fs.ensureDirSync(path.join(path.dirname(sln), ".vscode"));
+    const slnFolder = path.dirname(sln);
+    const vscodeFolder = path.join(slnFolder, ".vscode");
+    const launchFile = path.join(vscodeFolder, "launch.json");
+    const tasksFile = path.join(vscodeFolder, "tasks.json");
+
+    fs.mkdirSync(vscodeFolder);
 
     let lines = fs.readFileSync(sln).toString().split("\n");
-
-    let launchPath = path.join(path.dirname(sln), ".vscode", "launch.json");
-    let launchJson: LaunchJson = getLaunchJson(launchPath);
-
-    let tasksPath = path.join(path.dirname(sln), ".vscode", "tasks.json");
-    let tasksJson: TaskJson = getTaskJson(tasksPath);
-
-    let projects = lines.filter(line => line.indexOf("Project") === 0);
+    let launchJson = await getLaunchJson(launchFile);
+    let tasksJson = await getTaskJson(tasksFile);
+    let projects = lines.filter((line: string) => line.indexOf("Project") === 0);
 
     for (const line of projects) {
         const project = line.split("=")[1].trim();
         let projData = project.split(",");
 
-        let projectName = projData[0].trim();
-        projectName = projectName.substring(1, projectName.length - 1);
         let projectPath = projData[1].trim();
         projectPath = projectPath.substring(1, projectPath.length - 1);
 
-        let projectDir = path.dirname(projectPath);
-
-        await generateLaunch(launchJson, projectName, projectDir, projectPath);
-        await generateTask(tasksJson, projectName, projectPath);
+        await generateLaunch(launchJson, projectPath);
+        await generateTask(tasksJson, projectPath);
     }
 
-    fs.writeFileSync(tasksPath, JSON.stringify(tasksJson, null, 4));
-    fs.writeFileSync(launchPath, JSON.stringify(launchJson, null, 4));
+    fs.writeFileSync(tasksFile, JSON.stringify(tasksJson, null, 4));
+    fs.writeFileSync(launchFile, JSON.stringify(launchJson, null, 4));
 }
 
-export async function generateLaunch(launchJson: LaunchJson, projectName: string, projectDir: string, projectPath: string) {
-    let launchAlreadyExists = false;
-    launchJson.configurations.forEach(config => {
-        if (config.name === projectName) {
-            launchAlreadyExists = true;
-        }
-    });
+export async function generateLaunch(launchJson: any, projectPath: string) {
+    let projectDir = path.dirname(projectPath);
+    let projectExt = path.extname(projectPath);
+    let projectName = path.basename(projectPath, projectExt);
 
-    if (launchAlreadyExists === false) {
-        let outputTypeRegex = new RegExp("<OutputType>(.*)</OutputType>");
-        let targetFrameworkRegex = new RegExp("<TargetFramework>(.*)<\/TargetFramework>");
-        let data = fs.readFileSync(path.join(workspace.workspaceFolders![0].uri.fsPath, projectPath)).toString();
-        let outputTypes = outputTypeRegex.exec(data);
+    let outputTypeRegex = new RegExp("<OutputType>(.*)</OutputType>");
+    let targetFrameworkRegex = new RegExp("<TargetFramework>(.*)<\/TargetFramework>");
+    let data = fs.readFileSync(path.join(vscode.workspace.workspaceFolders![0].uri.fsPath, projectPath)).toString();
+    let outputTypes = outputTypeRegex.exec(data);
 
-        if (outputTypes === null || outputTypes[1] === null) {
-            return;
-        }
-
-        // Cant launch debug run a Library project
-        if (outputTypes[1] === "Library") {
-            return;
-        }
-
-        let target = targetFrameworkRegex.exec(data);
-
-        if (target === null) {
-            window.showErrorMessage("Could not find target framework in " + projectPath);
-            return;
-        }
-
-        launchJson.configurations.push({
-            name: projectName,
-            type: "coreclr",
-            request: "launch",
-            preLaunchTask: "Build " + projectName,
-            program: "${workspaceFolder}/" + projectDir + "/bin/Debug/" + target[1] + "/" + projectName + ".dll",
-            cwd: "${workspaceFolder}/" + projectDir,
-            console: "integratedTerminal"
-        });
-    }
-}
-
-export async function generateTask(tasksJson: TaskJson, projectName: string, projectPath: string) {
-
-    let taskAlreadyExists = false;
-
-    for (const task of tasksJson.tasks) {
-        if (task.label === "Build " + projectName) {
-            taskAlreadyExists = true;
-        }
-    }
-
-    if (taskAlreadyExists) {
+    if (outputTypes === null || outputTypes[1] === null) {
         return;
     }
+
+    // Cant debug a Library project
+    if (outputTypes[1] === "Library") {
+        return;
+    }
+
+    let target = targetFrameworkRegex.exec(data);
+
+    if (target === null) {
+        vscode.window.showErrorMessage("Could not find target framework in " + projectPath);
+        return;
+    }
+
+    let config = vscode.workspace.getConfiguration(ns)
+
+    launchJson.configurations.push({
+        name: projectName,
+        type: "coreclr",
+        request: "launch",
+        preLaunchTask: "Build " + projectName,
+        program: "${workspaceFolder}/" + projectDir + "/bin/Debug/" + target[1] + "/" + projectName + ".dll",
+        cwd: "${workspaceFolder}/" + projectDir,
+        console: config.get<string>("launchConfig.console"),
+        internalConsoleOptions: config.get<string>("launchConfig.internalConsoleOptions"),
+        __autoGenerated__: true
+    });
+}
+
+export async function generateTask(tasksJson: any, projectPath: string) {
+    let projectExt = path.extname(projectPath);
+    let projectName = path.basename(projectPath, projectExt);
+
+    let config = vscode.workspace.getConfiguration(ns)
 
     tasksJson.tasks.push({
         label: "Build " + projectName,
@@ -110,29 +97,48 @@ export async function generateTask(tasksJson: TaskJson, projectName: string, pro
             "/property:GenerateFullPaths=true",
             "/consoleloggerparameters:NoSummary"
         ],
-        problemMatcher: "$msCompile",
-        group: "build"
+        problemMatcher: config.get<string>("taskConfig.problemMatcher"),
+        group: "build",
+        __autoGenerated__: true
     });
 }
 
-export function getLaunchJson(launchPath: string): LaunchJson {
-    if (fs.existsSync(launchPath)) {
-        return JSON.parse(fs.readFileSync(launchPath).toString());
+export async function getLaunchJson(filepath: string) {
+    let launchJson: any = {};
+
+    if (fs.existsSync(filepath)) {
+        launchJson = JSON.parse(fs.readFileSync(filepath).toString());
+
+        for (let i = 0; i < launchJson.configurations.length; i++) {
+            if (launchJson.configurations[i].__autoGenerated__ !== undefined) {
+                launchJson.configurations.splice(i, 1);
+            }
+        }
     } else {
-        return {
+        launchJson = {
             version: "0.2.0",
             configurations: []
         };
     }
+
+    return launchJson;
 }
 
-export function getTaskJson(tasksPath: string): TaskJson {
-    if (fs.existsSync(tasksPath)) {
-        return JSON.parse(fs.readFileSync(tasksPath).toString());
+export async function getTaskJson(filepath: string) {
+    let taskJson: any;
+    if (fs.existsSync(filepath)) {
+        taskJson = JSON.parse(fs.readFileSync(filepath).toString());
+
+        for (let i = 0; i < taskJson.tasks.length; i++) {
+            if (taskJson.tasks[i].__autoGenerated__ !== undefined) {
+                taskJson.tasks.splice(i, 1);
+            }
+        }
     } else {
-        return {
+        taskJson = {
             version: "2.0.0",
             tasks: []
         };
     }
+    return taskJson;
 }
