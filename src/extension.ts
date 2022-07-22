@@ -10,7 +10,7 @@ export async function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.commands.registerCommand(ns + ".generate-assets", generateAssets));
     context.subscriptions.push(vscode.commands.registerCommand(ns + ".solution.add", addProjectToSolution));
 
-    let autoGenerateAssets = vscode.workspace.getConfiguration(ns).get<Boolean>("autoGenerateAssets")
+    let autoGenerateAssets = vscode.workspace.getConfiguration(ns).get<Boolean>("autoGenerateAssets");
 
     if (autoGenerateAssets) {
         generateAssets();

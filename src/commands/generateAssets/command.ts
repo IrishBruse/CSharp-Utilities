@@ -18,7 +18,9 @@ export async function generateAssets() {
     const launchFile = path.join(vscodeFolder, "launch.json");
     const tasksFile = path.join(vscodeFolder, "tasks.json");
 
-    fs.mkdirSync(vscodeFolder);
+    if (!fs.existsSync(vscodeFolder)) {
+        fs.mkdirSync(vscodeFolder);
+    }
 
     let lines = fs.readFileSync(sln).toString().split("\n");
     let launchJson = await getLaunchJson(launchFile);
@@ -66,7 +68,7 @@ export async function generateLaunch(launchJson: any, projectPath: string) {
         return;
     }
 
-    let config = vscode.workspace.getConfiguration(ns)
+    let config = vscode.workspace.getConfiguration(ns);
 
     launchJson.configurations.push({
         name: projectName,
@@ -85,7 +87,7 @@ export async function generateTask(tasksJson: any, projectPath: string) {
     let projectExt = path.extname(projectPath);
     let projectName = path.basename(projectPath, projectExt);
 
-    let config = vscode.workspace.getConfiguration(ns)
+    let config = vscode.workspace.getConfiguration(ns);
 
     tasksJson.tasks.push({
         label: "Build " + projectName,

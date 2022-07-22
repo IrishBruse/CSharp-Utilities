@@ -2,7 +2,7 @@
     "name": "csharp-utilities",
     "displayName": "C# Utilities",
     "description": "C# Utility commands Visual Studio Code.",
-    "version": "0.4.0",
+    "version": "0.4.1",
     "author": "Ethan Conneely",
     "license": "MIT",
     "publisher": "irishbruse",

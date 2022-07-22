@@ -1,5 +1,10 @@
 # Changelog
 
+> 0.4.1
+
+Fixed:
+- Mkdir bug causing a crash
+
 > 0.4.0
 
 Added:
