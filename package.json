@@ -2,7 +2,7 @@
     "name": "csharp-utilities",
     "displayName": "C# Utilities",
     "description": "C# Utility commands Visual Studio Code.",
-    "version": "0.4.1",
+    "version": "0.4.2",
     "author": "Ethan Conneely",
     "license": "MIT",
     "publisher": "irishbruse",
@@ -24,7 +24,7 @@
         "onCommand:csharp-utilities.generate-assets",
         "onCommand:csharp-utilities.solution.add",
         "onLanguage:csharp",
-        "workspaceContains:*.csproj"
+        "workspaceContains:**/*.csproj"
     ],
     "contributes": {
         "commands": [
