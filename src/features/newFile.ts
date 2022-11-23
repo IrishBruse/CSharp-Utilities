@@ -1,13 +1,17 @@
 import { FileCreateEvent, SnippetString, window, workspace } from "vscode";
 
-export async function handleNewFile(e: FileCreateEvent) {
-    for (const file of e.files) {
-        if (!file.fsPath.endsWith(".cs")) {
+export async function handleNewFile(e: FileCreateEvent)
+{
+    for (const file of e.files)
+    {
+        if (!file.fsPath.endsWith(".cs"))
+        {
             continue;
         }
 
         const textDocument = await workspace.openTextDocument(file);
-        if (textDocument.getText()) {
+        if (textDocument.getText())
+        {
             continue;
         }
         const snippetLines: string[] = [];

@@ -1,5 +1,10 @@
 # Changelog
 
+> 0.4.3
+
+Fixed:
+- Bug duplicating tasks
+
 > 0.4.1
 
 Fixed:

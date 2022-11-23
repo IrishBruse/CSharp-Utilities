@@ -5,14 +5,16 @@ import { handleNewFile } from "./features/newFile";
 
 export const ns = "csharp-utilities";
 
-export async function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext)
+{
     // Commands
     context.subscriptions.push(vscode.commands.registerCommand(ns + ".generate-assets", generateAssets));
     context.subscriptions.push(vscode.commands.registerCommand(ns + ".solution.add", addProjectToSolution));
 
     let autoGenerateAssets = vscode.workspace.getConfiguration(ns).get<Boolean>("autoGenerateAssets");
 
-    if (autoGenerateAssets) {
+    if (autoGenerateAssets)
+    {
         generateAssets();
     }
 
