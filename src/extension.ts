@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { generateAssets } from "./commands/generateAssets/command";
 import { addProjectToSolution } from "./commands/solution/add/command";
 import { handleNewFile } from "./features/newFile";
+import { CSprojEditorProvider } from "./panels/csprojView";
 
 export const ns = "csharp-utilities";
 
@@ -20,6 +21,10 @@ export async function activate(context: vscode.ExtensionContext)
 
     // Features
     context.subscriptions.push(vscode.workspace.onDidCreateFiles(handleNewFile));
+
+    // Editor
+    context.subscriptions.push(CSprojEditorProvider.register(context));
 }
+
 
 export function deactivate() { }

@@ -1,0 +1,24 @@
+.settings-editor {
+    overflow: hidden;
+    max-width: 1200px;
+    margin: auto;
+}
+
+.settings-editor:focus {
+    outline: none !important;
+}
+
+.settings-editor input {
+    border-radius: 3px;
+}
+
+.settings-editor>.settings-header {
+    box-sizing: border-box;
+    margin: auto;
+    overflow: hidden;
+    margin-top: 11px;
+    padding-top: 3px;
+    padding-left: 24px;
+    padding-right: 24px;
+    max-width: 1200px;
+}

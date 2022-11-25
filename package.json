@@ -12,10 +12,12 @@
         "onCommand:csharp-utilities.generate-assets",
         "onCommand:csharp-utilities.solution.add",
         "onLanguage:csharp",
+        "onCustomEditor:csharp-utilities.csproj-editor",
         "workspaceContains:**/*.csproj"
     ],
     "dependencies": {
-        "fs-extra": "^10.1.0"
+        "fs-extra": "^10.1.0",
+        "ws": "^8.11.0"
     },
     "devDependencies": {
         "@types/fs-extra": "^9.0.13",
@@ -64,6 +66,17 @@
         "watch-tests": "tsc -p . -w --outDir out"
     },
     "contributes": {
+        "customEditors": [
+            {
+                "viewType": "csharp-utilities.csproj-editor",
+                "displayName": "Project Editor",
+                "selector": [
+                    {
+                        "filenamePattern": "*.csproj"
+                    }
+                ]
+            }
+        ],
         "commands": [
             {
                 "command": "csharp-utilities.generate-assets",
